@@ -1,141 +1,173 @@
 # Delivery Insurance Fraud Detection Prototype
 
-A React + Vite prototype that demonstrates how delivery insurance claims can be evaluated with multi-signal fraud checks, instead of trusting GPS alone.
+This project is a frontend prototype built with React and Vite to demonstrate how a delivery insurance platform can detect suspicious claims using multi-layer risk checks instead of trusting GPS alone.
 
-## Inspiration
+## Project Overview
 
-GPS-only claim verification is vulnerable to spoofing. This project was built to show a safer and more explainable approach where multiple independent checks contribute to the final claim decision.
+In this scenario, delivery agents can try to fake claim eligibility by spoofing location data. A GPS-only validation model can be bypassed, so this prototype applies layered checks and a risk score before deciding whether a claim should be approved or flagged.
 
-## What It Does
+The app simulates three fraud signals:
 
-The app analyzes a simulated insurance claim using three fraud indicators:
+- `fakeGPS`: possible GPS spoofing or route inconsistency
+- `deviceMismatch`: suspicious change in device identity
+- `abnormalBehavior`: unusual delivery pattern compared to expected behavior
 
-- Fake GPS detection
-- Device mismatch detection
-- Abnormal behavioral pattern detection
+The output is fully explainable and shows:
 
-Each indicator contributes to a weighted risk score. The app then shows:
+- check-by-check status
+- total risk score
+- risk level (`LOW`, `MEDIUM`, `HIGH`)
+- final decision (`APPROVED` or `FLAGGED`)
 
-- Individual check status
-- Final risk score
-- Risk level (`LOW`, `MEDIUM`, `HIGH`)
-- Final claim decision (`APPROVED` or `FLAGGED`)
+## Why This Project Matters
 
-## Solution Architecture
+- Demonstrates adversarial thinking against spoofing attacks
+- Shows explainable risk scoring logic instead of black-box decisioning
+- Balances fraud prevention and fairness for genuine users
+- Presents a clean UI suitable for non-technical stakeholders
 
-The architecture is intentionally layered and explainable.
+## Core Features Included
 
-1. Signal Collection Layer
-- Collects three independent fraud signals: GPS, device, behavior.
+- Multi-layer fraud simulation for GPS, device, and behavior checks
+- Weighted risk scoring model
+- Risk classification bands
+- Final claim decision logic
+- Manual fraud toggles for testing different scenarios
+- Visual risk meter and score breakdown
+- Human-readable explanation panel for decision transparency
+- Timestamped analysis results
 
-2. Scoring Layer
-- Converts active signals into a weighted total score:
+## Risk Scoring Logic
 
-$$
-Risk = 30G + 25D + 20B
-$$
+Current scoring in `src/App.jsx`:
 
-Where:
+- Fake GPS: `+30`
+- Device mismatch: `+25`
+- Abnormal behavior: `+20`
 
-- $G = 1$ when fake GPS is detected, otherwise $0$
-- $D = 1$ when device mismatch is detected, otherwise $0$
-- $B = 1$ when abnormal behavior is detected, otherwise $0$
+Decision rule:
 
-3. Decision Layer
-- Uses a transparent rule:
+- `score > 50` => `FLAGGED`
+- `score <= 50` => `APPROVED`
 
-$$
-Decision =
-\begin{cases}
-FLAGGED, & \text{if } Risk > 50 \\
-APPROVED, & \text{if } Risk \le 50
-\end{cases}
-$$
+Risk levels:
 
-4. UX Layer
-- Displays a visual meter, score breakdown, and human-readable explanation so non-technical users can understand the result.
+- `0-40` => `LOW`
+- `41-70` => `MEDIUM`
+- `71+` => `HIGH`
 
-## Features Included
+## Adversarial Defense & Anti-Spoofing Strategy
 
-- Multi-layer fraud detection simulation
-- Weighted risk scoring system
-- Risk level classification bands
-- Manual test toggles for each fraud signal
-- Real-time score meter and breakdown
-- Final decision card with explanation
-- Responsive UI for desktop and mobile
+### 1) Differentiation from GPS-only architecture
 
-## How We Built It
+GPS-only systems are fragile because attackers can spoof coordinates with readily available apps. This prototype uses independent checks (GPS + device + behavior), forcing an attacker to bypass multiple controls at once.
 
-- Frontend: React 18
-- Build tooling: Vite 4
-- Logic: JavaScript functions for scoring and decisioning
-- Styling: CSS with dashboard-style components
+### 2) Data used to detect fake coordinates
 
-The core logic is implemented in [src/App.jsx](src/App.jsx), and UI styling is in [src/App.css](src/App.css).
+The design validates risk using multiple signal classes:
 
-## Challenges We Ran Into
+- route and movement plausibility
+- device consistency and trust history
+- behavioral pattern stability
 
-- Balancing detection and fairness for legitimate users
-- Keeping decision logic simple but still realistic
-- Making fraud results understandable for non-technical reviewers
-- Setting up GitHub Pages deployment with repository subpath routing
+A single suspicious event does not directly reject a claim. The final outcome depends on aggregate risk.
 
-## Accomplishments We Are Proud Of
+### 3) UX balance for honest users
 
-- Delivered a working end-to-end fraud analysis prototype
-- Added explainable and transparent decisioning
-- Deployed the app publicly on GitHub Pages
-- Produced recruiter-friendly documentation and workflow templates
+The UX avoids harsh one-shot rejection:
 
-## What We Learned
+- low risk is auto-approved
+- medium risk is review-oriented
+- high risk is flagged for investigation
 
-- Defense-in-depth is critical against spoofing attacks
-- Explainability is essential in trust-sensitive systems
-- Product storytelling and documentation are as important as code
-
-## What Is Next
-
-- Add backend API and persistent claim history
-- Add real geofence and telemetry validation
-- Add investigator dashboard for flagged claims
-- Add automated tests for scoring boundaries
+This helps avoid penalizing users affected by transient network issues or weather-related signal instability.
 
 ## Tech Stack
 
-React, Vite, JavaScript, CSS, GitHub Actions, GitHub Pages
+- React 18
+- Vite 4
+- JavaScript (ES modules)
+- CSS
 
-## Run Locally
+## Try It Out
 
-Use Node.js 14+ and npm.
+Live demo:
+
+https://vyshnavireddy05.github.io/delivery-insurance-fraud-detection/
+
+If the page shows 404 right after a push, wait 1-2 minutes for GitHub Actions deployment to complete.
+
+## How To Run The Project
+
+### Prerequisites
+
+- Node.js 14+
+- npm
+
+### Local Setup
+
+Run these commands in the folder that contains `package.json`:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the URL shown in terminal, usually:
+Then open the local URL shown in terminal, usually:
 
 ```text
 http://localhost:5173/
 ```
 
-Build for production:
+### Production Build
 
 ```bash
 npm run build
 ```
 
-Preview production build:
+### Preview Production Build
 
 ```bash
 npm run preview
 ```
 
-## Try It Out
+## How To Use The App
 
-https://2300032592.github.io/delivery-insurance-fraud-detection/
+1. Open the dashboard.
+2. Optionally enable test toggles (`Fake GPS`, `Device Mismatch`, `Abnormal Behavior`).
+3. Click `Claim Weather Insurance`.
+4. Review the checks, risk score, risk level, and final decision.
 
-## GitHub Repository
+## Example Test Scenarios
 
-https://github.com/2300032592/delivery-insurance-fraud-detection
+- All toggles OFF: expected mostly low-risk approvals
+- One toggle ON: usually medium risk, often review-safe
+- Two or more toggles ON: higher risk, likely flagged
+
+## Project Structure
+
+```text
+guideware-phase1/
+	index.html
+	package.json
+	vite.config.js
+	src/
+		App.jsx
+		App.css
+		main.jsx
+		index.css
+	README.md
+```
+
+## Current Limitations
+
+- Frontend simulation only (no backend verification)
+- No persistent claim history or user identity ledger
+- No real telemetry or device fingerprint provider integration
+
+## Future Improvements
+
+- Add backend scoring API with audit logs
+- Add real geospatial validation and geofencing checks
+- Add investigator dashboard for flagged claims
+- Add unit and integration tests for scoring boundaries
